@@ -1,5 +1,4 @@
 # Uncomment the required imports before adding the code
-
 from django.contrib.auth.models import User
 
 from django.http import JsonResponse
@@ -164,19 +163,15 @@ def get_dealer_details(request, dealer_id):
 
 
 # Create a `add_review` view to submit a review
+@csrf_exempt
 def add_review(request):
-    if (request.user.is_anonymous is False):
+    try:
         data = json.loads(request.body)
-        try:
-            post_review(data)
-            return JsonResponse({"status": 200})
-        except Exception as err:
-            return JsonResponse({
-                "status": 401,
-                "message": "Error in posting review" + err
-            })
-    else:
-        return JsonResponse({
-            "status": 403,
-            "message": "Unauthorized"
-        })
+
+        logger.info("add_review executed")
+
+        response = post_review(data)
+        return JsonResponse({"status": 200, "response": response})
+    except Exception as err:
+        print(f"Unexpected {err=}, {type(err)=}")
+        return JsonResponse({"status":401,"message":"Error in posting review"})
